@@ -14,6 +14,9 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('initGoogleAuth', async (args: { string: string }) =>
       ipcRenderer.invoke('initGoogleAuth', args)
     )
+    contextBridge.exposeInMainWorld('sendTestEmail', async (args: any) =>
+      ipcRenderer.invoke('sendTestEmail', args)
+    )
   } catch (error) {
     console.error(error)
   }

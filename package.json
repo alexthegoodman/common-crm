@@ -24,7 +24,9 @@
     "@electron-toolkit/utils": "^2.0.0",
     "electron-store": "^8.1.0",
     "electron-updater": "^6.1.1",
-    "googleapis": "^126.0.1"
+    "googleapis": "^126.0.1",
+    "js-base64": "^3.7.5",
+    "nodemailer": "^6.9.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^1.0.1",

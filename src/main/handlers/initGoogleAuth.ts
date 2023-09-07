@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import { shell } from 'electron'
 
 interface Args {
   string: string
@@ -7,24 +7,24 @@ interface Args {
 const initGoogleAuth = async (events: Electron.IpcMainInvokeEvent, args: Args): Promise<void> => {
   console.info('initGoogleAuth called with args: ', args)
 
-  //   try {
-  //     console.info('url', url)
+  try {
+    // fetch url from api
+    const data = await fetch('http://localhost:3000/api/auth/get-google-url')
+    const json = await data.json()
+    const url = json.url
 
-  //     // open window to allow user to select account
-  //     const authWindow = new BrowserWindow({
-  //       width: 800,
-  //       height: 600,
-  //       show: false,
-  //       webPreferences: {
-  //         nodeIntegration: false
-  //       }
-  //     })
+    if (!url) {
+      console.error('No url found in response')
+      return
+    }
 
-  //     authWindow.loadURL(url)
-  //     authWindow.show()
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
+    console.info('url fetched: ', url)
+
+    // open it in primary browser
+    shell.openExternal(url)
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 export default initGoogleAuth

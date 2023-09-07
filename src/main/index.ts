@@ -3,18 +3,14 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import path from 'path'
-const Store = require('electron-store')
+import store from './store'
 
 import initGoogleAuth from './handlers/initGoogleAuth'
+import sendTestEmail from './handlers/sendTestEmail'
 
-const storeSchema = {
-  accessToken: {
-    type: 'string'
-  }
-  // refreshToken?
-}
-
-const store = new Store(storeSchema)
+// Register ipcMain handlers
+ipcMain.handle('initGoogleAuth', initGoogleAuth)
+ipcMain.handle('sendTestEmail', sendTestEmail)
 
 const isDev = process.env.NODE_ENV === 'development'
 let mainWindow
@@ -60,11 +56,8 @@ if (!gotTheLock) {
   })
 }
 
-// Register ipcMain handlers
-ipcMain.handle('initGoogleAuth', initGoogleAuth)
-
+// create main window
 function createMainWindow(): void {
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
@@ -96,9 +89,6 @@ function createMainWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
@@ -127,6 +117,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
