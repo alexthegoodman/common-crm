@@ -2,15 +2,70 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import path from 'path'
+const Store = require('electron-store')
 
 import initGoogleAuth from './handlers/initGoogleAuth'
+
+const storeSchema = {
+  accessToken: {
+    type: 'string'
+  }
+  // refreshToken?
+}
+
+const store = new Store(storeSchema)
+
+const isDev = process.env.NODE_ENV === 'development'
+let mainWindow
+
+// register deeplinks
+if (isDev && process.platform === 'win32') {
+  console.info('is dev')
+  app.setAsDefaultProtocolClient('sunshot-app', process.execPath, [path.resolve(process.argv[1])])
+} else {
+  app.setAsDefaultProtocolClient('sunshot-app')
+}
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+
+    const url = commandLine.pop()
+
+    if (!url) {
+      console.error('No url found in commandLine')
+      return
+    }
+
+    const urlData = new URL(url)
+    const accessToken = urlData.searchParams.get('accessToken')
+
+    if (!accessToken) {
+      console.error('No accessToken found in url')
+      return
+    }
+
+    console.info('accessToken found', accessToken)
+
+    store.set('accessToken', accessToken)
+  })
+}
 
 // Register ipcMain handlers
 ipcMain.handle('initGoogleAuth', initGoogleAuth)
 
 function createMainWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
